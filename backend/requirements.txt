@@ -1,0 +1,9 @@
+replicate
+python-dotenv
+groq
+pyaudio 
+SpeechRecognition
+flask 
+flask-cors
+assemblyai
+boto3
