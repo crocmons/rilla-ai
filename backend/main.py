@@ -33,6 +33,7 @@ microphone = sr.Microphone()
 
 # Global variables to store transcriptions and manage streaming
 transcriptions = []
+conversation_texts = []
 is_listening = False
 
 def upload_to_s3(file_name, bucket, object_name=None):
@@ -70,18 +71,22 @@ def recognize_audio():
             if not s3_url:
                 continue
 
-            # Send the audio to Groq for transcription
+            # Transcription using the Groq API
             with open(filename, "rb") as file:
-                transcription = client.audio.transcriptions.create(
+                transcription_response = client.audio.transcriptions.create(
                     file=(filename, file.read()),
                     model="whisper-large-v3",
                     response_format="verbose_json",
                 )
-                
-                # Filter out unwanted transcriptions (e.g., "Thank you" messages)
-                if transcription.text.strip() and "thank" not in transcription.text.lower():
-                    print("Transcription:", transcription.text)
-                    transcriptions.append({"text": transcription.text, "audio_url": s3_url})
+
+                # Add the new transcription to the conversation history
+                if transcription_response.text.strip() and "thank" not in transcription_response.text.lower():
+                    print("Transcription:", transcription_response.text)
+                    conversation_texts.append(transcription_response.text)
+                    transcriptions.append({
+                        "text": transcription_response.text,
+                        "audio_url": s3_url
+                    })
 
             # Optionally, delete the local file after upload
             os.remove(filename)
@@ -108,6 +113,31 @@ def stopListening():
 @app.route('/transcriptions', methods=['GET'])
 def get_transcriptions():
     return jsonify(transcriptions)
+
+@app.route('/conversation-summary', methods=['GET'])
+def get_conversation_summary():
+    conversation_text = ' '.join(conversation_texts)
+    
+    # Create a system prompt for summarization
+    prompt = (
+        f"Generate a detailed summary of the following conversation text:\n\n"
+        f"{conversation_text}\n\n"
+        "Provide a concise summary that captures the main points of the conversation."
+    )
+    
+    # Generate the summary using Groq's text generation
+    response = client.chat.completions.create(
+        model="llama3-8b-8192",  # Replace with the correct model name if needed
+        messages=[
+            {"role": "system", "content": "You are an expert summarizer."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    
+    summary = response.choices[0].message.content.strip()
+    return jsonify({
+        "summary": summary
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)

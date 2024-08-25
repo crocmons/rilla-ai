@@ -2,9 +2,12 @@ import React from "react";
 
 // Define the Comment interface
 interface Comment {
-  id: string;
   text: string;
-  attachments: string[]; // URLs of uploaded files
+  commentID: string;
+  transcriptSegmentID: string;
+  userID: string;
+  timestamp: string;
+  fileLinks: string[]; // URLs of uploaded files
 }
 
 // Define the props for the Comments component
@@ -17,7 +20,7 @@ interface CommentsProps {
 const Comments: React.FC<CommentsProps> = ({ comments, onEdit, onDelete }) => {
   const handleEdit = async (comment: Comment) => {
     try {
-      const response = await fetch(`https://your-api-endpoint.com/comments/${comment.id}`, {
+      const response = await fetch(`https://riz3ap1tx8.execute-api.ap-south-1.amazonaws.com/comments/${comment.commentID}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +41,7 @@ const Comments: React.FC<CommentsProps> = ({ comments, onEdit, onDelete }) => {
 
   const handleDelete = async (commentId: string) => {
     try {
-      const response = await fetch(`https://your-api-endpoint.com/comments/${commentId}`, {
+      const response = await fetch(`https://riz3ap1tx8.execute-api.ap-south-1.amazonaws.com/comments/${commentId}`, {
         method: "DELETE",
       });
 
@@ -56,10 +59,10 @@ const Comments: React.FC<CommentsProps> = ({ comments, onEdit, onDelete }) => {
     <div className="comments">
       {comments.length > 0 ? (
         comments.map((comment) => (
-          <div key={comment.id} className="comment">
+          <div key={comment.commentID} className="comment">
             <p>{comment.text}</p>
             <button onClick={() => handleEdit(comment)}>Edit</button>
-            <button onClick={() => handleDelete(comment.id)}>Delete</button>
+            <button onClick={() => handleDelete(comment.commentID)}>Delete</button>
           </div>
         ))
       ) : (

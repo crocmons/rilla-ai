@@ -5,12 +5,16 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import Comments from "@/components/Comments";
+import ConversationSummary from "@/components/ConversationSummary";
 
-// Interface definitions
+// Updated interface definitions to match Comments component
 interface Comment {
-  id: string;
   text: string;
-  attachments: string[]; // URLs of uploaded files
+  commentID: string;
+  transcriptSegmentID: string;
+  userID: string;
+  timestamp: string;
+  fileLinks: string[]; // URLs of uploaded files
 }
 
 interface Transcription {
@@ -123,7 +127,7 @@ export default function Home() {
 
         if (editingComment) {
           const updatedComments = selectedSegment.comments.map((comment) =>
-            comment.id === editingComment.id ? updatedComment : comment
+            comment.commentID === editingComment.commentID ? updatedComment : comment
           );
           selectedSegment.comments = updatedComments;
         } else {
@@ -159,7 +163,7 @@ export default function Home() {
           throw new Error("Failed to delete comment");
         }
 
-        selectedSegment.comments = selectedSegment.comments.filter((comment) => comment.id !== commentId);
+        selectedSegment.comments = selectedSegment.comments.filter((comment) => comment.commentID !== commentId);
         setSelectedSegment({ ...selectedSegment });
       } catch (error) {
         console.error("Error deleting comment:", error);
@@ -168,7 +172,8 @@ export default function Home() {
   };
 
   return (
-    <div className=" flex flex-col items-center justify-center bg-gray-100 my-2 min-h-screen">
+    <div className="grid md:grid-cols-2 mx-auto grid-cols-1">
+    <div className="flex flex-col items-center justify-center bg-gray-100 my-2 min-h-screen">
       <h1 className="text-4xl font-bold mb-8">Real-Time Speech Transcription</h1>
       <div className="flex gap-4">
         <button
@@ -191,32 +196,29 @@ export default function Home() {
       <div className="w-full max-w-2xl">
         <h2 className="text-2xl font-semibold mb-4 text-gray-700">Transcriptions:</h2>
         <ul className="bg-white p-4 rounded shadow-md">
-        {transcriptions.map((transcription, index) => (
-  <li
-    key={index}
-    className="mb-4 cursor-pointer"
-    onClick={() => handleSegmentClick(transcription)}
-  >
-    <h3 className="font-semibold mb-2 text-blue-600">Conversation {index + 1}:</h3>
-    <p className="mb-2">Transcription: {transcription.text}</p>
-    <audio controls>
-      <source src={transcription.audio_url} type="audio/mpeg" />
-      <source src={transcription.audio_url} type="audio/ogg" />
-      Your browser does not support the audio element.
-    </audio>
-    {/* Display comments for this segment */}
-    <Comments
-  comments={transcription.comments || []} // Ensure comments is always an array
-  onEdit={handleEditComment}
-  onDelete={handleDeleteComment}
-/>
-
-  </li>
-))}
-
+          {transcriptions.map((transcription, index) => (
+            <li
+              key={index}
+              className="mb-4 cursor-pointer"
+              onClick={() => handleSegmentClick(transcription)}
+            >
+              <h3 className="font-semibold mb-2 text-blue-600">Conversation {index + 1}:</h3>
+              <p className="mb-2">Transcription: {transcription.text}</p>
+              <audio controls>
+                <source src={transcription.audio_url} type="audio/mpeg" />
+                <source src={transcription.audio_url} type="audio/ogg" />
+                Your browser does not support the audio element.
+              </audio>
+              <Comments
+                comments={transcription.comments || []} // Ensure comments is always an array
+                onEdit={handleEditComment}
+                onDelete={handleDeleteComment}
+              />
+            </li>
+          ))}
         </ul>
       </div>
-
+      
       <Modal
         open={isCommentModalOpen}
         onClose={() => setIsCommentModalOpen(false)}
@@ -240,6 +242,8 @@ export default function Home() {
           </div>
         </Box>
       </Modal>
+    </div>
+      <ConversationSummary />
     </div>
   );
 }
