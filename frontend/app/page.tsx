@@ -114,7 +114,7 @@ export default function Home() {
       });
 
       try {
-        const response = await fetch(`https://riz3ap1tx8.execute-api.ap-south-1.amazonaws.com/${selectedSegment.id}/comments`, {
+        const response = await fetch(`https://riz3ap1tx8.execute-api.ap-south-1.amazonaws.com/comments/${selectedSegment.id}`, {
           method: editingComment ? "PUT" : "POST",
           body: formData,
         });
@@ -155,7 +155,7 @@ export default function Home() {
   const handleDeleteComment = async (commentId: string) => {
     if (selectedSegment) {
       try {
-        const response = await fetch(`https://riz3ap1tx8.execute-api.ap-south-1.amazonaws.com/${selectedSegment.id}/comments/${commentId}`, {
+        const response = await fetch(`https://riz3ap1tx8.execute-api.ap-south-1.amazonaws.com/comments/${commentId}`, {
           method: "DELETE",
         });
 
@@ -213,6 +213,7 @@ export default function Home() {
                 comments={transcription.comments || []} // Ensure comments is always an array
                 onEdit={handleEditComment}
                 onDelete={handleDeleteComment}
+                onAdd={handleSaveComment}
               />
             </li>
           ))}
