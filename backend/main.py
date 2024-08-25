@@ -58,7 +58,7 @@ def recognize_audio():
             with microphone as source:
                 recognizer.adjust_for_ambient_noise(source)
                 print("Say something...")
-                audio = recognizer.record(source, duration=10)
+                audio = recognizer.record(source, duration=6)
 
             # Create a unique filename using UUID and timestamp
             filename = f"audio_{uuid.uuid4()}_{int(time.time())}.m4a"
@@ -127,7 +127,7 @@ def get_conversation_summary():
     
     # Generate the summary using Groq's text generation
     response = client.chat.completions.create(
-        model="llama3-8b-8192",  # Replace with the correct model name if needed
+        model="llama3-8b-8192",  
         messages=[
             {"role": "system", "content": "You are an expert summarizer."},
             {"role": "user", "content": prompt}
